@@ -2,12 +2,11 @@
 
 import re
 import itertools
+import argparse
+import urllib2
+import codecs
+import os
 
-arg = [
-'/var/mobile/Applications/EE962478-374F-46A3-BAA9-6A276B8EB00D/Documents/grabArgs.py', 
-'Project Done:\n\t- Task 01 @done\n\t\t- Subtask 1.01\n\t\tEste é um comentário malandro\n\t\t- Subtask 1.02\n\t\t\t- Subsubtask 1.01 @done\n\t\t\tEste é outro comentário malandro\n\t\t\t- Subsubtask 1.02\n\t\t\t\t- Subsubsubtask 1.01\n\t\t\t- Subsubtask 1.03\n\t\t- Subtask 1.03\n\t\t- Subtask 1.04\n\t- Task 02 @done\n\t\t- Subtask 2.01 @done\n\t\t- Subtask 2.02\n\t\t\t- Subsubtask 2.01 @done\n\t\t\t- Subsubtask 2.02\n\t\t\t\t- Subsubsubtask 2.01 @done\n\t\t\t- Subsubtask 2.03 @done\n\t\t- Subtask 2.03 @done\n\t\t- Subtask 2.04 @done\n\t- Task 03 @done\n\t\t- Subtask 3.01 @done\n\t\t- Subtask 3.02\n\t- Task 04 @done\n\t\t- Subtask 4.01 @done\n\t\t- Subtask 4.02 @done\n\t- Task 05 @done\n\t\t- Subtask 5.01 @done\n\t\t- Subtask 5.02 @done\n\t\t\t- Subsubtask 5.03 @done\n\t\t- Subtask 5.03 @done\n\t- Task 06 @done\n\t\t- Subtask 6.01\n\t\t\t- Subsubtask 6.01 @done\n\t\t\t- Subsubtask 6.02 @done\n\t\t- Subtask 6.02 @done\n\t- Task 07 @done\n\t\t- Subtask 7.01\n\t\t\t- Subsubtask 7.01 @done\n\t\t- Subtask 7.02\n\t\t\t- Subsubtask 7.02 @done\n\t- Task 08 @done\n\t\t- Subtask 8.01\n\t\t\t- Subsubtask 8.01 @done\n\t\t\t- Subsubtask 8.02\n\t\t\t\t- Subsubsubtask 8.01 @done\n\t\t\t\t- Subsubsubtask 8.02\n\t\t\t\t\t- Subsubsubsubtask 8.01 @done\n\t\t\t\t- Subsubsubtask 8.03 @done\n\t\t\t- Subsubtask 8.03 @done\n\t\t- Subtask 8.02 @done\n\t\t- Subtask 8.03\n\t\t\t- Subsubtask 8.04 @done\n\t\t\t- Subsubtask 8.05\n\t\t\t\t- Subsubsubtask 8.04\n\t\t\t\t\t- Subsubsubsubtask 8.02 @done\n\t\t\t- Subsubtask 8.06 @done\n\t- Task 09 @done\n\tThis is a comment\n\t\t- Subtask 9.01 @done\n\t\tThis is a subtask comment\n\t\t- Subtask 9.02\n\t\tAnother comment\n\t\t\t- Subsubtask 9.01 @done\n\t\t\t- Subsubtask 9.02 @done\n\t\t\tWhy so many comments?\n\t\t\t- Subsubtask 9.03\n\t\t\t\t- Subsubsubtask 9.01 @done\n\t\t\t\tJust another comment to break your code\n\t\t\t\t- Subsubsubtask 9.02\n\t\t\t\tBreak, break, break\n\t\t\t\t\t- Subsubsubsubtask 9.01 @done\n\t\t\t\t\tThis is the last comment, I promise\n\t\t\t\t- Subsubsubtask 9.03 @done\n\t\t\t\tI lied.\n\t\t\t- Subsubtask 9.04\n\t\t\t\t- Subsubsubtask 9.03 @done\n\t\t\t\tI love lying\n\t\t\t- Subsubtask 9.05 @done\n\t\t- Subtask 9.03 @done\n\t\tOk, this is truly the last comment.\n\t\tNah.',
-'Project Done:\nThis is a project comment\n\t- Task 09\n\tThis is a comment\n\t\t- Subtask 9.01 @done\n\t\tThis is a subtask comment\n\t\t- Subtask 9.02\n\t\tAnother comment\n\t\t\t- Subsubtask 9.01 @done\n\t\t\t- Subsubtask 9.02 @done\n\t\t\tWhy so many comments?\n\t\t\t- Subsubtask 9.03\n\t\t\t\t- Subsubsubtask 9.01 @done\n\t\t\t\tJust another comment to break your code\n\t\t\t\t- Subsubsubtask 9.02\n\t\t\t\tBreak, break, break\n\t\t\t\t\t- Subsubsubsubtask 9.01 @done\n\t\t\t\t\tThis is the last comment, I promise\n\t\t\t\t- Subsubsubtask 9.03 @done\n\t\t\t\tI lied.\n\t\t\t- Subsubtask 9.04\n\t\t\t\t- Subsubsubtask 9.03 @done\n\t\t\t\tI love lying\n\t\t\t- Subsubtask 9.05 @done\n\t\t- Subtask 9.03 @done\n\t\tOk, this is truly the last comment.\n\t\tNah.',
-'Inbox:\n\nProject 01:\n\t- Task 1.01\n\t\t- Subtask 01\n\t\t- Subtask 02\n\t\t- Subtask 03\n\t- Task 02 @done\n\t- Task 03\n\n/Project 02:\n\t- Task 01\n\tComentário que destruirá seu domingo\n\t\t- Primeira subtarefa\n\t\t- Segunda subtarefa\n\t\t- Terceira subtarefa @done\n\t\t- Quarta subtarefa\n\t\t\t- Primeira subsubtarefa\n\t\t\t- Segunda subsubtarefa @done\n\t\t- Quinta tarefa\n\t- Task 02\n\t- Task 03 @done\n\t- Task 04\n\nProject 03:\nSou um comentário extremamente complexo que quebrarei o seu script.\n\t- Task 01\n\t\t- Subtask 01 @done\n\t\t- Subtask 02\n\t- Task 02\n\t- Task 03\n\nProject 04:\n\t- Task 01\n\t\t- Subtask 01\n\t\t- Subtask 02 @done\n\t\t- Subtask 03\n\t\t\t- Subsubtask 01 @done\n\t\t\t- Subsubtask 02 @done\n\t\t- Subtask 04\n\t- Task 02\n\t- Task 03\n\nProject 05:\n\t- Task 01 @done\n\t- Task 02 @done\n\t- Task 03 @done\n\t- Task 04\n\t\t- Subtask 01 @done\n\t\t- Subtask 02 @done\n\t\t- Subtask 03 @done\n\t- Task 05\n\nProject 06:\n\t- Task 01 @done\n\t- Task 02\n\t\t- Subtask 01\n\t\tSou outro comentário maroto que arruinará o seu dia.\n\t\t- Subtask 02\n\t\tSou a primeira linha de um comentário maldoso.\n\t\tEsta é a segunda linha do comentário acima que te fará chorar.\n\t\t- Subtask 03\n\t- Task 03\n\nProject 7:\n\t- Lavar roupa\n\tSou a primeira linha de um comentário maldoso.\n\t\t- Cuecas @done\n\t\t- Meias @done\n\t- Cozinhar risoto @done\n\t\t- Lavar panela @done\n\t\t- Comprar arroz @done\n\t\t- Preparar caldo\n\nProject 08:\n\t- Task 01\n\tSou a primeira linha de um comentário maldoso.\n\nProject 09:\n\t- Task 01']
 
 def MarkAsDone(project):
 	tasks = [(x,y) for x,y in enumerate(project) if re.search('\t+-\s.*',y)]
@@ -49,9 +48,76 @@ def nextActions(projects):
 					break
 	return projects
 
-					
-allTasks = arg[3].split('\n\n')
-projects = [filter(None, proj.split('\n')) for proj in allTasks]
-output = '\n\n'.join(['\n'.join([str(task) for task in proj]) for proj in nextActions(projects)])
 
-print output
+def debug():
+	'''Used for debugging purposes. Change the list when needed to test complex lists.'''
+	
+	arg = 'Inbox:\n\nProject 01:\n\t- Task 1.01\n\t\t- Subtask 01\n\t\t- Subtask 02\n\t\t- Subtask 03\n\t- Task 02 @done\n\t- Task 03\n\n/Project 02:\n\t- Task 01\n\tComentário que destruirá seu domingo\n\t\t- Primeira subtarefa\n\t\t- Segunda subtarefa\n\t\t- Terceira subtarefa @done\n\t\t- Quarta subtarefa\n\t\t\t- Primeira subsubtarefa\n\t\t\t- Segunda subsubtarefa @done\n\t\t- Quinta tarefa\n\t- Task 02\n\t- Task 03 @done\n\t- Task 04\n\nProject 03:\nSou um comentário extremamente complexo que quebrarei o seu script.\n\t- Task 01\n\t\t- Subtask 01 @done\n\t\t- Subtask 02\n\t- Task 02\n\t- Task 03\n\nProject 04:\n\t- Task 01\n\t\t- Subtask 01\n\t\t- Subtask 02 @done\n\t\t- Subtask 03\n\t\t\t- Subsubtask 01 @done\n\t\t\t- Subsubtask 02 @done\n\t\t- Subtask 04\n\t- Task 02\n\t- Task 03\n\nProject 05:\n\t- Task 01 @done\n\t- Task 02 @done\n\t- Task 03 @done\n\t- Task 04\n\t\t- Subtask 01 @done\n\t\t- Subtask 02 @done\n\t\t- Subtask 03 @done\n\t- Task 05\n\nProject 06:\n\t- Task 01 @done\n\t- Task 02\n\t\t- Subtask 01\n\t\tSou outro comentário maroto que arruinará o seu dia.\n\t\t- Subtask 02\n\t\tSou a primeira linha de um comentário maldoso.\n\t\tEsta é a segunda linha do comentário acima que te fará chorar.\n\t\t- Subtask 03\n\t- Task 03\n\nProject 7:\n\t- Lavar roupa\n\tSou a primeira linha de um comentário maldoso.\n\t\t- Cuecas @done\n\t\t- Meias @done\n\t- Cozinhar risoto @done\n\t\t- Lavar panela @done\n\t\t- Comprar arroz @done\n\t\t- Preparar caldo\n\nProject 08:\n\t- Task 01\n\tSou a primeira linha de um comentário maldoso.\n\nProject 09:\n\t- Task 01'
+	
+	allTasks = arg.split('\n\n')
+	projects = [filter(None, proj.split('\n')) for proj in allTasks]
+	output = '\n\n'.join(['\n'.join([str(task) for task in proj]) for proj in nextActions(projects)])
+
+	print output
+
+
+def output():
+	# TODO: Catch errors and fail gracefully
+	
+	if args.list:
+		arg = urllib2.unquote(args.list[0]).decode('string-escape')
+		
+		allTasks = arg.split('\n\n')
+		projects = [filter(None, proj.split('\n')) for proj in allTasks]
+		output = '\n\n'.join(['\n'.join([str(task) for task in proj]) for proj in nextActions(projects)])
+
+		print output	
+	
+	elif args.file:
+		if os.path.exists(args.file[0]):
+			f = codecs.open(args.file[0])
+			arg = f.read()
+			
+			allTasks = arg.split('\n\n')
+			projects = [filter(None, proj.split('\n')) for proj in allTasks]
+			output = '\n\n'.join(['\n'.join([str(task) for task in proj]) for proj in nextActions(projects)])
+			
+			print output
+			
+		else:
+			print "No file found at specified location."
+		
+		
+		
+def save():
+	# TODO: Everything for now :D
+	# TODO: If the input is a file and no output file is choosen, then output file == input file
+	# TODO: If input is a list and no output file is choosen, then default to printing to stdout
+	pass
+
+
+parser = argparse.ArgumentParser(description="A simple script to sanitise done tasks and show next actions.")
+
+tpinput = argparse.ArgumentParser(add_help=False)
+group1 = tpinput.add_mutually_exclusive_group()
+group1.add_argument('-f', '--file', help="TaskPaper file to read.", nargs='+')
+group1.add_argument('-l', '--list', help="URL encoded list passed via command line.", nargs='+')
+tpinput.add_argument('outfile', nargs='?', help="File in which to save the resulting list.")
+
+
+parsers = parser.add_subparsers()
+
+tp_debug = parsers.add_parser('debug', help="Uses the debug list and prints results for testing.")
+tp_debug.set_defaults(func=debug)
+
+tp_save = parsers.add_parser('save', help="Saves the final list to file.", parents=[tpinput])
+tp_save.set_defaults(func=save)
+
+tp_output = parsers.add_parser('output', help="Saves the final list to file.", parents=[tpinput])
+tp_output.set_defaults(func=output)
+
+args = parser.parse_args()
+
+args.func()
+
+
